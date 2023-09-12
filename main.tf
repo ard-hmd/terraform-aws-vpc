@@ -30,19 +30,19 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
-# # Create AWS private subnets
-# resource "aws_subnet" "private_subnet" {
-#   count                   = length(var.private_subnets_cidr)  # Create multiple subnets based on the count of provided CIDR blocks
-#   vpc_id                  = var.vpc_id  # Associate the subnets with the specified VPC
-#   cidr_block              = element(var.private_subnets_cidr, count.index)  # Use the CIDR block from the list based on the count index
-#   availability_zone       = element(var.availability_zones, count.index)  # Use the availability zone from the list based on the count index
-#   map_public_ip_on_launch = false  # Do not assign automatic public IP addresses
+# Create AWS private subnets
+resource "aws_subnet" "private_subnet" {
+  count                   = length(var.private_subnets_cidr)  # Create multiple subnets based on the count of provided CIDR blocks
+  vpc_id                  = var.vpc_id  # Associate the subnets with the specified VPC
+  cidr_block              = element(var.private_subnets_cidr, count.index)  # Use the CIDR block from the list based on the count index
+  availability_zone       = element(var.azs, count.index)  # Use the availability zone from the list based on the count index
+  map_public_ip_on_launch = false  # Do not assign automatic public IP addresses
 
-#   tags = {
-#     Name        = "${var.environment}-${element(var.availability_zones, count.index)}-private-subnet"  # Create a unique name for each subnet
-#     Environment = "${var.environment}"  # Assign the specified environment tag
-#   }
-# }
+  tags = {
+    Name        = "${var.environment}-${element(var.azs, count.index)}-private-subnet"  # Create a unique name for each subnet
+    Environment = "${var.environment}"  # Assign the specified environment tag
+  }
+}
 
 # # Create RDS subnet group
 # resource "aws_db_subnet_group" "rds_subnet_group" {
@@ -60,7 +60,7 @@ resource "aws_subnet" "public_subnet" {
 #   vpc_id = var.vpc_id  # Associating the route table with the VPC
 
 #   tags = {
-#     Name        = "${var.environment}-private-route-table-${element(var.availability_zones, count.index)}"  # Naming the route table
+#     Name        = "${var.environment}-private-route-table-${element(var.azs, count.index)}"  # Naming the route table
 #     Environment = var.environment
 #   }
 # }
@@ -122,7 +122,7 @@ resource "aws_subnet" "public_subnet" {
 #   depends_on = [aws_internet_gateway.ig]  # Ensure Internet Gateway is created first
 
 #   tags = {
-#     Name        = "${var.environment}-nat-eip-${element(var.availability_zones, count.index)}"
+#     Name        = "${var.environment}-nat-eip-${element(var.azs, count.index)}"
 #     Environment = var.environment
 #   }
 # }
@@ -134,7 +134,7 @@ resource "aws_subnet" "public_subnet" {
 #   subnet_id      = element(var.public_subnet_ids, count.index)  # Use the corresponding public subnet
 
 #   tags = {
-#     Name        = "${var.environment}-nat-gateway-${element(var.availability_zones, count.index)}"
+#     Name        = "${var.environment}-nat-gateway-${element(var.azs, count.index)}"
 #     Environment = var.environment
 #   }
 # }
