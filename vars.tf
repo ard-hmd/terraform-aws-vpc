@@ -9,7 +9,7 @@ variable "aws_region" {
 # }
 
 variable "azs" {
-  availability_zones = ["eu-west-3a", "eu-west-3b"]
+  default = ["eu-west-3a", "eu-west-3b"]
 }
 
 # Set the default environment
