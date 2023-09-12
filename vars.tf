@@ -1,51 +1,37 @@
 # Set the default AWS region for the resources
 variable "aws_region" {
   default = "eu-west-3"
+  description = "Default AWS region where resources will be created."
 }
 
-# Local variable to generate availability zones based on the AWS region
-# locals {
-#   availability_zones = ["${var.aws_region}a", "${var.aws_region}b"]
-# }
-
+# Define the availability zones for the resources
 variable "azs" {
   default = ["eu-west-3a", "eu-west-3b"]
+  description = "List of availability zones within the specified AWS region."
 }
 
-# Set the default environment
+# Set the default environment label for the resources
 variable "environment" {
   default = "prod"
+  description = "Environment label to be used for naming and tagging resources."
 }
 
 # Set the CIDR block for the VPC
 variable "vpc_cidr" {
   default     = "10.0.0.0/16"
-  description = "CIDR block of the VPC"
+  description = "CIDR block for the Virtual Private Cloud (VPC)."
 }
 
 # Define the CIDR blocks for public subnets
 variable "public_subnets_cidr" {
   type        = list(any)
   default     = ["10.0.0.0/20", "10.0.128.0/20"]
-  description = "CIDR blocks for Public Subnets"
+  description = "List of CIDR blocks for the public subnets within the VPC."
 }
 
 # Define the CIDR blocks for private subnets
 variable "private_subnets_cidr" {
   type        = list(any)
   default     = ["10.0.16.0/20", "10.0.144.0/20"]
-  description = "CIDR blocks for Private Subnets"
+  description = "List of CIDR blocks for the private subnets within the VPC."
 }
-
-# # Define the database username variable
-# variable "db_username" {
-#   description = "The database username"
-#   type        = string
-# }
-
-# # Define the sensitive database password variable
-# variable "db_password" {
-#   description = "The database password"
-#   type        = string
-#   sensitive   = true
-# }

@@ -1,6 +1,10 @@
-# AWS VPC
+# =============================
+# VPC and Associated Resources
+# =============================
+
+# Create a custom VPC in AWS
 resource "aws_vpc" "custom_vpc" {
-  # Définition du bloc CIDR pour le VPC
+  # Define the CIDR block for the VPC
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
@@ -11,7 +15,7 @@ resource "aws_vpc" "custom_vpc" {
   }
 }
 
-# Création des sous-réseaux publics AWS
+# Create public subnets within the VPC
 resource "aws_subnet" "public_subnet" {
   count                   = length(var.public_subnets_cidr)
   vpc_id                  = aws_vpc.custom_vpc.id
@@ -25,7 +29,7 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
-# Création des sous-réseaux privés AWS
+# Create private subnets within the VPC
 resource "aws_subnet" "private_subnet" {
   count                   = length(var.private_subnets_cidr)
   vpc_id                  = aws_vpc.custom_vpc.id
@@ -39,38 +43,11 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
-# Création du groupe de sous-réseaux RDS
-resource "aws_db_subnet_group" "rds_subnet_group" {
-  name       = "rds_subnet_group"
-  subnet_ids = aws_subnet.private_subnet.*.id
+# =============================
+# Internet Access Resources
+# =============================
 
-  tags = {
-    Name = "Rds Subnet Group"
-  }
-}
-
-# Création des tables de routage privées pour chaque sous-réseau privé
-resource "aws_route_table" "private" {
-  count  = length(var.private_subnets_cidr)
-  vpc_id = aws_vpc.custom_vpc.id
-
-  tags = {
-    Name        = "${var.environment}-private-route-table-${element(var.azs, count.index)}"
-    Environment = var.environment
-  }
-}
-
-# Création d'une table de routage public pour les sous-réseaux publics
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.custom_vpc.id
-
-  tags = {
-    Name        = "${var.environment}-public-route-table"
-    Environment = var.environment
-  }
-}
-
-# Création d'une passerelle Internet AWS
+# Create an internet gateway and attach it to the VPC
 resource "aws_internet_gateway" "ig" {
   vpc_id = aws_vpc.custom_vpc.id
 
@@ -80,14 +57,7 @@ resource "aws_internet_gateway" "ig" {
   }
 }
 
-# Création d'une route par défaut vers la passerelle Internet pour les sous-réseaux publics
-resource "aws_route" "public_internet_gateway" {
-  route_table_id         = aws_route_table.public.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.ig.id
-}
-
-# Création des passerelles NAT AWS
+# Create NAT gateways for the public subnets
 resource "aws_nat_gateway" "nat" {
   count          = length(var.public_subnets_cidr)
   allocation_id  = element(aws_eip.nat_eip.*.id, count.index)
@@ -99,7 +69,14 @@ resource "aws_nat_gateway" "nat" {
   }
 }
 
-# Création d'une route par défaut vers la passerelle NAT pour les sous-réseaux privés
+# Create a default route pointing to the internet gateway for public subnets
+resource "aws_route" "public_internet_gateway" {
+  route_table_id         = aws_route_table.public.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.ig.id
+}
+
+# Create a default route pointing to the NAT gateway for private subnets
 resource "aws_route" "private_nat_gateway" {
   count                 = length(var.private_subnets_cidr)
   route_table_id        = aws_route_table.private[count.index].id
@@ -107,28 +84,29 @@ resource "aws_route" "private_nat_gateway" {
   nat_gateway_id        = aws_nat_gateway.nat[count.index].id
 }
 
-# Association des sous-réseaux publics avec la table de routage public
+# Associate public subnets with the public route table
 resource "aws_route_table_association" "public" {
   count          = length(var.public_subnets_cidr)
   subnet_id      = aws_subnet.public_subnet[count.index].id
   route_table_id = aws_route_table.public.id
 }
 
-# Association des sous-réseaux privés avec leurs tables de routage privées respectives
+# Associate private subnets with their respective private route tables
 resource "aws_route_table_association" "private" {
   count          = length(var.private_subnets_cidr)
   subnet_id      = aws_subnet.private_subnet[count.index].id
   route_table_id = aws_route_table.private[count.index].id
 }
 
-# Création des IPs élastiques AWS pour les passerelles NAT
+# Create Elastic IPs for the NAT gateways
 resource "aws_eip" "nat_eip" {
   count      = length(var.public_subnets_cidr)
   vpc        = true
   depends_on = [aws_internet_gateway.ig]
-
+  
   tags = {
     Name        = "${var.environment}-nat-eip-${element(var.azs, count.index)}"
     Environment = var.environment
   }
 }
+
