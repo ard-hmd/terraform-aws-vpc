@@ -91,6 +91,18 @@ resource "aws_route" "public_internet_gateway" {
   gateway_id             = aws_internet_gateway.ig.id  # Target Internet Gateway
 }
 
+# Create AWS NAT Gateways
+resource "aws_nat_gateway" "nat" {
+  count          = length(var.public_subnets_cidr)  # Create a NAT Gateway for each public subnet
+  allocation_id  = element(aws_eip.nat_eip.*.id, count.index)  # Use the EIP ID as the allocation ID
+  subnet_id      = element(var.public_subnet_ids, count.index)  # Use the corresponding public subnet
+
+  tags = {
+    Name        = "${var.environment}-nat-gateway-${element(var.azs, count.index)}"
+    Environment = var.environment
+  }
+}
+
 # Create a default route to NAT Gateway for private subnets
 resource "aws_route" "private_nat_gateway" {
   count                 = length(var.private_subnets_cidr)  # Creating multiple routes based on the count of private subnets
@@ -125,15 +137,5 @@ resource "aws_eip" "nat_eip" {
   }
 }
 
-# Create AWS NAT Gateways
-resource "aws_nat_gateway" "nat" {
-  count          = length(var.public_subnets_cidr)  # Create a NAT Gateway for each public subnet
-  allocation_id  = element(aws_eip.nat_eip.*.id, count.index)  # Use the EIP ID as the allocation ID
-  subnet_id      = element(var.public_subnet_ids, count.index)  # Use the corresponding public subnet
 
-  tags = {
-    Name        = "${var.environment}-nat-gateway-${element(var.azs, count.index)}"
-    Environment = var.environment
-  }
-}
 
