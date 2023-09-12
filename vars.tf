@@ -4,8 +4,12 @@ variable "aws_region" {
 }
 
 # Local variable to generate availability zones based on the AWS region
-locals {
-  availability_zones = ["${var.aws_region}a", "${var.aws_region}b"]
+# locals {
+#   availability_zones = ["${var.aws_region}a", "${var.aws_region}b"]
+# }
+
+variable "azs" {
+  availability_zones = ["eu-west-3a", "eu-west-3b"]
 }
 
 # Set the default environment
