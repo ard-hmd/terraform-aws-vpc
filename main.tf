@@ -1,5 +1,5 @@
 # AWS VPC
-resource "var" "vpc" {
+resource "aws_vpc" "vpc" {
   # Define the CIDR block for the VPC
   cidr_block           = var.vpc_cidr
 
