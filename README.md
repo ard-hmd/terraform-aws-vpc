@@ -32,7 +32,7 @@ Here are the primary variables you might want to adjust:
 
 - `var.aws_region`: Specifies the AWS region where the VPC and related resources will be created. Default is set to `eu-west-3`.
 - `var.vpc_cidr`: Defines the CIDR block for the VPC, determining the range of IP addresses for the network. Default is `10.0.0.0/16`.
-- ... [other variables from `vars.tf` with detailed descriptions]
+- For a complete list of available variables and their descriptions, please refer to the [vars.tf](./vars.tf) file.
 
 ## Outputs
 
@@ -40,4 +40,5 @@ After applying the module, you'll receive several outputs that can be used in ot
 
 - `vpc_id`: The unique ID of the created VPC.
 - `public_subnets_ids`: A list of IDs for the public subnets, useful for deploying public-facing resources.
-- ... [other outputs from `outputs.tf` with detailed descriptions]
+- For a complete list of outputs and their descriptions, please refer to the [outputs.tf](./outputs.tf) file.
+
