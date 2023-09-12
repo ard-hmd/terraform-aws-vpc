@@ -75,11 +75,20 @@ resource "aws_route_table" "public" {
   }
 }
 
+# Create an AWS Internet Gateway
+resource "aws_internet_gateway" "ig" {
+  vpc_id = aws_vpc.custom_vpc.id  # Attach the Internet Gateway to the specified VPC
+
+  tags = {
+    "Name"        = "${var.environment}-igw"  # Set a meaningful name for the Internet Gateway
+    "Environment" = var.environment
+  }
+}
 # Create a default route to the Internet Gateway for public subnets
 resource "aws_route" "public_internet_gateway" {
   route_table_id         = aws_route_table.public.id  # Associating the route with the public route table
   destination_cidr_block = "0.0.0.0/0"  # Destination CIDR block for the default route
-  gateway_id             = var.internet_gateway_id  # Target Internet Gateway
+  gateway_id             = aws_internet_gateway.ig.id  # Target Internet Gateway
 }
 
 # Create a default route to NAT Gateway for private subnets
@@ -102,17 +111,6 @@ resource "aws_route_table_association" "private" {
   count          = length(var.private_subnets_cidr)  # Associating private subnets with private route tables
   subnet_id      = element(var.private_subnet_ids, count.index)  # Subnet to associate
   route_table_id = element(aws_route_table.private.*.id, count.index)  # Route table to associate with
-}
-
-
-# Create an AWS Internet Gateway
-resource "aws_internet_gateway" "ig" {
-  vpc_id = aws_vpc.custom_vpc.id  # Attach the Internet Gateway to the specified VPC
-
-  tags = {
-    "Name"        = "${var.environment}-igw"  # Set a meaningful name for the Internet Gateway
-    "Environment" = var.environment
-  }
 }
 
 # Create AWS Elastic IPs for NAT Gateways
