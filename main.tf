@@ -19,7 +19,7 @@ resource "var" "vpc" {
 # Create AWS public subnets
 resource "aws_subnet" "public_subnet" {
   count                   = length(var.public_subnets_cidr)  # Create multiple subnets based on the count of provided CIDR blocks
-  vpc_id                  = aws_vpc.vpc_id  # Associate the subnets with the specified VPC
+  vpc_id                  = var.vpc_id  # Associate the subnets with the specified VPC
   cidr_block              = element(var.public_subnets_cidr, count.index)  # Use the CIDR block from the list based on the count index
   availability_zone       = element(var.availability_zones, count.index)  # Use the availability zone from the list based on the count index
   map_public_ip_on_launch = true  # Enable automatic public IP assignment for instances launched in this subnet
@@ -33,7 +33,7 @@ resource "aws_subnet" "public_subnet" {
 # Create AWS private subnets
 resource "aws_subnet" "private_subnet" {
   count                   = length(var.private_subnets_cidr)  # Create multiple subnets based on the count of provided CIDR blocks
-  vpc_id                  = aws_vpc.vpc_id  # Associate the subnets with the specified VPC
+  vpc_id                  = var.vpc_id  # Associate the subnets with the specified VPC
   cidr_block              = element(var.private_subnets_cidr, count.index)  # Use the CIDR block from the list based on the count index
   availability_zone       = element(var.availability_zones, count.index)  # Use the availability zone from the list based on the count index
   map_public_ip_on_launch = false  # Do not assign automatic public IP addresses
@@ -57,7 +57,7 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
 # Create private route tables for each private subnet
 resource "aws_route_table" "private" {
   count = length(var.private_subnets_cidr)  # Creating multiple resources based on the count of private subnets
-  vpc_id = aws_vpc.vpc_id  # Associating the route table with the VPC
+  vpc_id = var.vpc_id  # Associating the route table with the VPC
 
   tags = {
     Name        = "${var.environment}-private-route-table-${element(var.availability_zones, count.index)}"  # Naming the route table
@@ -67,7 +67,7 @@ resource "aws_route_table" "private" {
 
 # Create a public route table for public subnets
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.vpc_id  # Associating the route table with the VPC
+  vpc_id = var.vpc_id  # Associating the route table with the VPC
 
   tags = {
     Name        = "${var.environment}-public-route-table"  # Naming the route table
@@ -107,7 +107,7 @@ resource "aws_route_table_association" "private" {
 
 # Create an AWS Internet Gateway
 resource "aws_internet_gateway" "ig" {
-  vpc_id = aws_vpc.vpc_id  # Attach the Internet Gateway to the specified VPC
+  vpc_id = var.vpc_id  # Attach the Internet Gateway to the specified VPC
 
   tags = {
     "Name"        = "${var.environment}-igw"  # Set a meaningful name for the Internet Gateway
