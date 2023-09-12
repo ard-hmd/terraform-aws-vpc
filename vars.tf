@@ -33,15 +33,15 @@ variable "private_subnets_cidr" {
   description = "CIDR blocks for Private Subnets"
 }
 
-# Define the database username variable
-variable "db_username" {
-  description = "The database username"
-  type        = string
-}
+# # Define the database username variable
+# variable "db_username" {
+#   description = "The database username"
+#   type        = string
+# }
 
-# Define the sensitive database password variable
-variable "db_password" {
-  description = "The database password"
-  type        = string
-  sensitive   = true
-}
+# # Define the sensitive database password variable
+# variable "db_password" {
+#   description = "The database password"
+#   type        = string
+#   sensitive   = true
+# }
