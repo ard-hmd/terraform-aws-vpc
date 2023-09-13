@@ -46,7 +46,7 @@ resource "aws_subnet" "private_subnet" {
 # Create private route tables for each private subnet
 resource "aws_route_table" "private" {
   count = length(var.private_subnets_cidr)  # Creating multiple resources based on the count of private subnets
-  vpc_id = var.vpc_id  # Associating the route table with the VPC
+  vpc_id = aws_vpc.custom_vpc.id  # Associating the route table with the VPC
 
   tags = {
     Name        = "${var.environment}-private-route-table-${element(var.availability_zones, count.index)}"  # Naming the route table
@@ -56,7 +56,7 @@ resource "aws_route_table" "private" {
 
 # Create a public route table for public subnets
 resource "aws_route_table" "public" {
-  vpc_id = var.vpc_id  # Associating the route table with the VPC
+  vpc_id = aws_vpc.custom_vpc.id  # Associating the route table with the VPC
 
   tags = {
     Name        = "${var.environment}-public-route-table"  # Naming the route table
