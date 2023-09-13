@@ -43,6 +43,15 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
+resource "aws_db_subnet_group" "rds_subnet_group" {
+  name       = "rds_subnet_group"  # Name of the RDS subnet group
+  subnet_ids = aws_subnet.private_subnet.*.id  # Use the IDs of private subnets for RDS instances
+
+  tags = {
+    Name = "Rds Subnet Group"  # Assign a tag to the subnet group
+  }
+}
+
 # Create private route tables for each private subnet
 resource "aws_route_table" "private" {
   count = length(var.private_subnets_cidr)  # Creating multiple resources based on the count of private subnets
@@ -63,6 +72,8 @@ resource "aws_route_table" "public" {
     Environment = var.environment
   }
 }
+
+
 
 # =============================
 # Internet Access Resources
