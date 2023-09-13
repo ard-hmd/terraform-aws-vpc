@@ -49,7 +49,7 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.custom_vpc.id  # Associating the route table with the VPC
 
   tags = {
-    Name        = "${var.environment}-private-route-table-${element(var.availability_zones, count.index)}"  # Naming the route table
+    Name        = "${var.environment}-private-route-table-${element(var.azs, count.index)}"  # Naming the route table
     Environment = var.environment
   }
 }
