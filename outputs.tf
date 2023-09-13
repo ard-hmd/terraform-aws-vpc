@@ -6,8 +6,8 @@ output "vpc_id" {
 
 # Output the ID of the created VPC
 output "vpc_cidr" {
-  description = "The ID of the VPC."
-  value       = aws_vpc.custom_vpc.vpc_cidr
+  description = "The CIDR of the VPC."
+  value       = aws_vpc.custom_vpc.cidr_block
 }
 
 # Output the IDs of the public subnets created within the VPC
