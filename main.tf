@@ -133,7 +133,7 @@ resource "aws_route_table_association" "private" {
 # Create Elastic IPs for the NAT gateways
 resource "aws_eip" "nat_eip" {
   count      = length(var.public_subnets_cidr)
-  vpc        = true
+  domain        = true
   depends_on = [aws_internet_gateway.ig]
   
   tags = {
