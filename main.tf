@@ -44,31 +44,31 @@ resource "aws_subnet" "private_subnet" {
 }
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
-  name       = "rds_subnet_group"  # Name of the RDS subnet group
-  subnet_ids = aws_subnet.private_subnet.*.id  # Use the IDs of private subnets for RDS instances
+  name       = "rds_subnet_group"             # Name of the RDS subnet group
+  subnet_ids = aws_subnet.private_subnet.*.id # Use the IDs of private subnets for RDS instances
 
   tags = {
-    Name = "Rds Subnet Group"  # Assign a tag to the subnet group
+    Name = "Rds Subnet Group" # Assign a tag to the subnet group
   }
 }
 
 # Create private route tables for each private subnet
 resource "aws_route_table" "private" {
-  count = length(var.private_subnets_cidr)  # Creating multiple resources based on the count of private subnets
-  vpc_id = aws_vpc.custom_vpc.id  # Associating the route table with the VPC
+  count  = length(var.private_subnets_cidr) # Creating multiple resources based on the count of private subnets
+  vpc_id = aws_vpc.custom_vpc.id            # Associating the route table with the VPC
 
   tags = {
-    Name        = "${var.environment}-private-route-table-${element(var.azs, count.index)}"  # Naming the route table
+    Name        = "${var.environment}-private-route-table-${element(var.azs, count.index)}" # Naming the route table
     Environment = var.environment
   }
 }
 
 # Create a public route table for public subnets
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.custom_vpc.id  # Associating the route table with the VPC
+  vpc_id = aws_vpc.custom_vpc.id # Associating the route table with the VPC
 
   tags = {
-    Name        = "${var.environment}-public-route-table"  # Naming the route table
+    Name        = "${var.environment}-public-route-table" # Naming the route table
     Environment = var.environment
   }
 }
@@ -91,9 +91,9 @@ resource "aws_internet_gateway" "ig" {
 
 # Create NAT gateways for the public subnets
 resource "aws_nat_gateway" "nat" {
-  count          = length(var.public_subnets_cidr)
-  allocation_id  = element(aws_eip.nat_eip.*.id, count.index)
-  subnet_id      = aws_subnet.public_subnet[count.index].id
+  count         = length(var.public_subnets_cidr)
+  allocation_id = element(aws_eip.nat_eip.*.id, count.index)
+  subnet_id     = aws_subnet.public_subnet[count.index].id
 
   tags = {
     Name        = "${var.environment}-nat-gateway-${element(var.azs, count.index)}"
@@ -110,10 +110,10 @@ resource "aws_route" "public_internet_gateway" {
 
 # Create a default route pointing to the NAT gateway for private subnets
 resource "aws_route" "private_nat_gateway" {
-  count                 = length(var.private_subnets_cidr)
-  route_table_id        = aws_route_table.private[count.index].id
+  count                  = length(var.private_subnets_cidr)
+  route_table_id         = aws_route_table.private[count.index].id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id        = aws_nat_gateway.nat[count.index].id
+  nat_gateway_id         = aws_nat_gateway.nat[count.index].id
 }
 
 # Associate public subnets with the public route table
@@ -133,9 +133,9 @@ resource "aws_route_table_association" "private" {
 # Create Elastic IPs for the NAT gateways
 resource "aws_eip" "nat_eip" {
   count      = length(var.public_subnets_cidr)
-  domain        = "vpc"
+  domain     = "vpc"
   depends_on = [aws_internet_gateway.ig]
-  
+
   tags = {
     Name        = "${var.environment}-nat-eip-${element(var.azs, count.index)}"
     Environment = var.environment

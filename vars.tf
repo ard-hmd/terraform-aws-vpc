@@ -1,18 +1,18 @@
 # Set the default AWS region for the resources
 variable "aws_region" {
-  default = "eu-west-3"
+  default     = "eu-west-3"
   description = "Default AWS region where resources will be created."
 }
 
 # Define the availability zones for the resources
 variable "azs" {
-  default = ["eu-west-3a", "eu-west-3b"]
+  default     = ["eu-west-3a", "eu-west-3b"]
   description = "List of availability zones within the specified AWS region."
 }
 
 # Set the default environment label for the resources
 variable "environment" {
-  default = "prod"
+  default     = "prod"
   description = "Environment label to be used for naming and tagging resources."
 }
 
